@@ -1,0 +1,179 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getProjects } from '../server/projects';
+
+const projects = await getProjects();
+---
+
+<Layout>
+	<h1>Admin Portfolio</h1>
+	<p>Upload gambar ke Vercel Blob, lalu simpan project ke Neon.</p>
+
+	<form id="project-form">
+		<label>
+			Judul
+			<input name="title" required />
+		</label>
+
+		<label>
+			Deskripsi
+			<textarea name="description" rows="3"></textarea>
+		</label>
+
+		<label>
+			URL Project (opsional)
+			<input name="projectUrl" type="url" placeholder="https://..." />
+		</label>
+
+		<label>
+			Gambar (jpg/png/webp, max 5MB)
+			<input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+		</label>
+
+		<button type="submit">Simpan Project</button>
+		<p id="status"></p>
+	</form>
+
+	<h2>Data Saat Ini</h2>
+	<ul class="list">
+		{projects.map((project) => (
+			<li>
+				<strong>{project.title}</strong>
+				<button class="delete" data-id={project.id}>Hapus</button>
+			</li>
+		))}
+	</ul>
+</Layout>
+
+<script>
+	const form = document.getElementById('project-form');
+	const statusEl = document.getElementById('status');
+
+	if (form instanceof HTMLFormElement && statusEl) {
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			statusEl.textContent = 'Menyimpan...';
+
+			const data = new FormData(form);
+			const title = String(data.get('title') || '').trim();
+			const description = String(data.get('description') || '').trim();
+			const projectUrl = String(data.get('projectUrl') || '').trim();
+
+			let imageUrl = '';
+			const file = data.get('image');
+			if (file instanceof File && file.size > 0) {
+				const uploadData = new FormData();
+				uploadData.append('file', file);
+
+				const uploadRes = await fetch('/api/upload', {
+					method: 'POST',
+					body: uploadData,
+				});
+
+				if (!uploadRes.ok) {
+					statusEl.textContent = 'Gagal upload gambar';
+					return;
+				}
+
+				const uploadBody = await uploadRes.json();
+				imageUrl = uploadBody.url || '';
+			}
+
+			const createRes = await fetch('/api/projects', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ title, description, projectUrl, imageUrl }),
+			});
+
+			if (!createRes.ok) {
+				statusEl.textContent = 'Gagal simpan project';
+				return;
+			}
+
+			statusEl.textContent = 'Berhasil disimpan, memuat ulang...';
+			window.location.reload();
+		});
+
+		document.querySelectorAll('.delete').forEach((button) => {
+			button.addEventListener('click', async () => {
+				const id = Number(button.getAttribute('data-id'));
+				if (!id) return;
+
+				const response = await fetch('/api/projects', {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id }),
+				});
+
+				if (response.ok) {
+					window.location.reload();
+				}
+			});
+		});
+	}
+</script>
+
+<style>
+	h1 {
+		margin-bottom: 8px;
+	}
+
+	form {
+		background: white;
+		padding: 16px;
+		border-radius: 10px;
+		border: 1px solid #e5e7eb;
+		display: grid;
+		gap: 12px;
+	}
+
+	label {
+		display: grid;
+		gap: 6px;
+		font-weight: 600;
+	}
+
+	input,
+	textarea,
+	button {
+		font: inherit;
+		padding: 10px;
+		border-radius: 8px;
+		border: 1px solid #d1d5db;
+	}
+
+	button {
+		cursor: pointer;
+		background: #111827;
+		color: white;
+		font-weight: 600;
+	}
+
+	.list {
+		list-style: none;
+		padding: 0;
+		display: grid;
+		gap: 8px;
+	}
+
+	.list li {
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.delete {
+		width: auto;
+		padding: 6px 10px;
+		background: #b91c1c;
+	}
+
+	#status {
+		margin: 0;
+		color: #4b5563;
+	}
+</style>

@@ -1,46 +1,83 @@
-# Astro Starter Kit: Basics
+# Portfolio Astro + Neon + Vercel Blob
 
-```sh
-npm create astro@latest -- --template basics
-```
+Stack yang dipakai:
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+- Frontend: Astro
+- Backend: Astro API Routes (serverless, cocok di Vercel)
+- Database: Neon PostgreSQL
+- Upload Gambar: Vercel Blob
 
-## 🚀 Project Structure
+## Struktur Penting
 
-Inside of your Astro project, you'll see the following folders and files:
+- `src/pages/index.astro` → halaman portfolio publik
+- `src/pages/admin.astro` → halaman admin (tambah/hapus project)
+- `src/pages/api/projects.ts` → API CRUD project
+- `src/pages/api/upload.ts` → API upload file ke Vercel Blob
+- `src/server/db.ts` → koneksi Neon
+- `src/server/projects.ts` → query database
+- `db/schema.sql` → schema tabel `projects`
+- `.env.example` → daftar environment variables
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+## Step by Step Setup
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+1. **Install dependency**
 
-## 🧞 Commands
+	```bash
+	npm install
+	```
 
-All commands are run from the root of the project, from a terminal:
+2. **Buat database di Neon**
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+	- Ambil connection string dari Neon dashboard.
+	- Jalankan SQL di `db/schema.sql`.
 
-## 👀 Want to learn more?
+3. **Buat Vercel Blob token**
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+	- Di Vercel dashboard, buka project Anda.
+	- Masuk ke Storage → Blob → buat Read/Write Token.
+
+4. **Set environment variables lokal**
+
+	- Copy file:
+
+	  ```bash
+	  cp .env.example .env
+	  ```
+
+	- Isi value berikut di `.env`:
+	  - `DATABASE_URL`
+	  - `BLOB_READ_WRITE_TOKEN`
+
+5. **Jalankan lokal**
+
+	```bash
+	npm run dev
+	```
+
+	- Portfolio publik: `http://localhost:4321/`
+	- Admin: `http://localhost:4321/admin`
+
+6. **Deploy ke Vercel**
+
+	- Push repo ke GitHub/GitLab.
+	- Import project di Vercel.
+	- Tambahkan env yang sama di Vercel Project Settings → Environment Variables:
+	  - `DATABASE_URL`
+	  - `BLOB_READ_WRITE_TOKEN`
+	- Deploy.
+
+## Cara Pakai Admin
+
+1. Buka `/admin`.
+2. Isi judul, deskripsi, link project.
+3. Pilih gambar (opsional).
+4. Klik **Simpan Project**.
+5. Data tampil di halaman `/`.
+
+## Catatan
+
+- Validasi upload: hanya `jpg/png/webp`, maksimal 5MB.
+- API upload menyimpan gambar sebagai public URL di Vercel Blob.
+- API dan halaman sudah cocok untuk runtime serverless di Vercel.
+
+# porto-adal-bonai
