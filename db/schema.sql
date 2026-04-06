@@ -6,3 +6,13 @@ CREATE TABLE IF NOT EXISTS projects (
 	project_url TEXT,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS articles (
+	id SERIAL PRIMARY KEY,
+	title TEXT NOT NULL,
+	slug TEXT NOT NULL UNIQUE,
+	excerpt TEXT NOT NULL,
+	content TEXT NOT NULL,
+	thumbnail_url TEXT NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

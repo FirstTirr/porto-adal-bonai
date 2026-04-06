@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createProject, deleteProject, getProjects } from '../../server/projects';
+import { isAdminAuthenticated } from '../../server/admin-auth';
 
 export const GET: APIRoute = async () => {
 	const projects = await getProjects();
@@ -9,7 +10,14 @@ export const GET: APIRoute = async () => {
 	});
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
+	if (!isAdminAuthenticated(cookies)) {
+		return new Response(JSON.stringify({ error: 'unauthorized' }), {
+			status: 401,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
+
 	const body = await request.json().catch(() => null);
 
 	if (!body || typeof body.title !== 'string' || body.title.trim().length === 0) {
@@ -32,7 +40,14 @@ export const POST: APIRoute = async ({ request }) => {
 	});
 };
 
-export const DELETE: APIRoute = async ({ request }) => {
+export const DELETE: APIRoute = async ({ request, cookies }) => {
+	if (!isAdminAuthenticated(cookies)) {
+		return new Response(JSON.stringify({ error: 'unauthorized' }), {
+			status: 401,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
+
 	const body = await request.json().catch(() => null);
 	const id = Number(body?.id);
 

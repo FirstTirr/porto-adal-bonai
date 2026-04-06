@@ -1,83 +1,78 @@
-# Portfolio Astro + Neon + Vercel Blob
+# Portfolio Adal Bonai
 
-Stack yang dipakai:
+Website portfolio bertema petualangan & kesehatan, dengan blog/artikel dynamic routing.
+
+## Stack
 
 - Frontend: Astro
-- Backend: Astro API Routes (serverless, cocok di Vercel)
+- Backend: Astro API Routes (serverless)
 - Database: Neon PostgreSQL
-- Upload Gambar: Vercel Blob
+- Upload gambar: Vercel Blob
 
-## Struktur Penting
+## Fitur
 
-- `src/pages/index.astro` → halaman portfolio publik
-- `src/pages/admin.astro` → halaman admin (tambah/hapus project)
-- `src/pages/api/projects.ts` → API CRUD project
-- `src/pages/api/upload.ts` → API upload file ke Vercel Blob
-- `src/server/db.ts` → koneksi Neon
-- `src/server/projects.ts` → query database
-- `db/schema.sql` → schema tabel `projects`
-- `.env.example` → daftar environment variables
+- Halaman beranda bertema petualangan & kesehatan
+- Section **About Adal Bonai**
+- Daftar blog/artikel di beranda
+- Dynamic route artikel di `/blog/[slug]`
+- Admin login
+- CRUD artikel (thumbnail wajib)
 
-## Step by Step Setup
+## Kredensial Admin (sesuai request)
 
-1. **Install dependency**
+- Username: `adal`
+- Password: `@adalbonai123/.@`
 
-	```bash
-	npm install
-	```
+## Letak File Penting
 
-2. **Buat database di Neon**
+- `src/pages/index.astro` → UI portfolio + list artikel
+- `src/pages/blog/[slug].astro` → halaman detail artikel (dynamic routing)
+- `src/pages/admin.astro` → UI login admin + CRUD artikel
+- `src/pages/api/admin/login.ts` → login admin
+- `src/pages/api/admin/logout.ts` → logout admin
+- `src/pages/api/articles.ts` → API CRUD artikel
+- `src/pages/api/upload.ts` → upload thumbnail ke Blob
+- `src/server/articles.ts` → query artikel
+- `src/server/admin-auth.ts` → session auth admin
+- `db/schema.sql` → tabel `projects` dan `articles`
 
-	- Ambil connection string dari Neon dashboard.
-	- Jalankan SQL di `db/schema.sql`.
+## Setup Step by Step
 
-3. **Buat Vercel Blob token**
+1. Install dependency
 
-	- Di Vercel dashboard, buka project Anda.
-	- Masuk ke Storage → Blob → buat Read/Write Token.
+   ```bash
+   npm install
+   ```
 
-4. **Set environment variables lokal**
+2. Siapkan environment lokal
 
-	- Copy file:
+   ```bash
+   cp .env.example .env
+   ```
 
-	  ```bash
-	  cp .env.example .env
-	  ```
+   Isi `.env`:
+   - `DATABASE_URL`
+   - `BLOB_READ_WRITE_TOKEN`
 
-	- Isi value berikut di `.env`:
-	  - `DATABASE_URL`
-	  - `BLOB_READ_WRITE_TOKEN`
+3. Jalankan schema SQL di Neon
 
-5. **Jalankan lokal**
+   - Buka Neon SQL Editor
+   - Jalankan isi file `db/schema.sql`
 
-	```bash
-	npm run dev
-	```
+4. Jalankan lokal
 
-	- Portfolio publik: `http://localhost:4321/`
-	- Admin: `http://localhost:4321/admin`
+   ```bash
+   npm run dev
+   ```
 
-6. **Deploy ke Vercel**
+5. Deploy ke Vercel
 
-	- Push repo ke GitHub/GitLab.
-	- Import project di Vercel.
-	- Tambahkan env yang sama di Vercel Project Settings → Environment Variables:
-	  - `DATABASE_URL`
-	  - `BLOB_READ_WRITE_TOKEN`
-	- Deploy.
+   - Import project repo ini ke Vercel
+   - Tambahkan env yang sama di Vercel Project Settings:
+     - `DATABASE_URL`
+     - `BLOB_READ_WRITE_TOKEN`
 
-## Cara Pakai Admin
+## Catatan Deploy
 
-1. Buka `/admin`.
-2. Isi judul, deskripsi, link project.
-3. Pilih gambar (opsional).
-4. Klik **Simpan Project**.
-5. Data tampil di halaman `/`.
-
-## Catatan
-
-- Validasi upload: hanya `jpg/png/webp`, maksimal 5MB.
-- API upload menyimpan gambar sebagai public URL di Vercel Blob.
-- API dan halaman sudah cocok untuk runtime serverless di Vercel.
-
-# porto-adal-bonai
+- Upload API menerima `jpg/png/webp` maksimal 5MB.
+- Endpoint upload & CRUD artikel butuh session admin login.

@@ -1,114 +1,266 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getProjects } from '../server/projects';
+import { getArticles } from '../server/articles';
+import { isAdminAuthenticated } from '../server/admin-auth';
 
-const projects = await getProjects();
+const authenticated = isAdminAuthenticated(Astro.cookies);
+const articles = authenticated ? await getArticles() : [];
 ---
 
 <Layout>
-	<h1>Admin Portfolio</h1>
-	<p>Upload gambar ke Vercel Blob, lalu simpan project ke Neon.</p>
+	<h1>Admin Blog</h1>
+	<p>Login admin, lalu kelola artikel. Thumbnail wajib diisi.</p>
 
-	<form id="project-form">
-		<label>
-			Judul
-			<input name="title" required />
-		</label>
+	{!authenticated ? (
+		<section class="panel">
+			<h2>Login Admin</h2>
+			<form id="login-form">
+				<label>
+					Username
+					<input name="username" required />
+				</label>
+				<label>
+					Password
+					<input name="password" type="password" required />
+				</label>
+				<button type="submit">Login</button>
+				<p id="login-status"></p>
+			</form>
+		</section>
+	) : (
+		<>
+			<section class="panel">
+				<div class="actions">
+					<h2>Tambah / Edit Artikel</h2>
+					<button id="logout-button" class="danger" type="button">Logout</button>
+				</div>
+				<form id="article-form">
+					<input name="id" type="hidden" />
+					<label>
+						Judul
+						<input name="title" required />
+					</label>
+					<label>
+						Ringkasan
+						<textarea name="excerpt" rows="2" required></textarea>
+					</label>
+					<label>
+						Konten Artikel
+						<textarea name="content" rows="8" required></textarea>
+					</label>
+					<label>
+						Thumbnail (wajib, jpg/png/webp)
+						<input name="thumbnail" type="file" accept="image/jpeg,image/png,image/webp" />
+					</label>
+					<input name="thumbnailUrl" type="hidden" />
+					<button type="submit">Simpan Artikel</button>
+					<button id="reset-button" type="button" class="light">Reset Form</button>
+					<p id="article-status"></p>
+				</form>
+			</section>
 
-		<label>
-			Deskripsi
-			<textarea name="description" rows="3"></textarea>
-		</label>
-
-		<label>
-			URL Project (opsional)
-			<input name="projectUrl" type="url" placeholder="https://..." />
-		</label>
-
-		<label>
-			Gambar (jpg/png/webp, max 5MB)
-			<input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
-		</label>
-
-		<button type="submit">Simpan Project</button>
-		<p id="status"></p>
-	</form>
-
-	<h2>Data Saat Ini</h2>
-	<ul class="list">
-		{projects.map((project) => (
-			<li>
-				<strong>{project.title}</strong>
-				<button class="delete" data-id={project.id}>Hapus</button>
-			</li>
-		))}
-	</ul>
+			<section class="panel">
+				<h2>Daftar Artikel</h2>
+				{articles.length === 0 ? (
+					<p>Belum ada artikel.</p>
+				) : (
+					<ul class="list">
+						{articles.map((article) => (
+							<li>
+								<div>
+									<strong>{article.title}</strong>
+									<p>{article.excerpt}</p>
+								</div>
+								<div class="actions">
+									<button
+										type="button"
+										class="edit"
+										data-id={article.id}
+										data-title={article.title}
+										data-excerpt={article.excerpt}
+										data-content={article.content}
+										data-thumbnail={article.thumbnail_url}
+									>
+										Edit
+									</button>
+									<button class="delete" type="button" data-id={article.id}>Hapus</button>
+								</div>
+							</li>
+						))}
+					</ul>
+				)}
+			</section>
+		</>
+	)}
 </Layout>
 
 <script>
-	const form = document.getElementById('project-form');
-	const statusEl = document.getElementById('status');
+	const loginForm = document.getElementById('login-form');
+	const loginStatus = document.getElementById('login-status');
 
-	if (form instanceof HTMLFormElement && statusEl) {
-		form.addEventListener('submit', async (event) => {
+	if (loginForm instanceof HTMLFormElement && loginStatus) {
+		loginForm.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			statusEl.textContent = 'Menyimpan...';
+			loginStatus.textContent = 'Memproses login...';
 
-			const data = new FormData(form);
+			const data = new FormData(loginForm);
+			const response = await fetch('/api/admin/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					username: String(data.get('username') || ''),
+					password: String(data.get('password') || ''),
+				}),
+			});
+
+			if (!response.ok) {
+				loginStatus.textContent = 'Login gagal';
+				return;
+			}
+
+			window.location.reload();
+		});
+	}
+
+	const articleForm = document.getElementById('article-form');
+	const articleStatus = document.getElementById('article-status');
+	const resetButton = document.getElementById('reset-button');
+	const logoutButton = document.getElementById('logout-button');
+
+	function clearForm() {
+		if (!(articleForm instanceof HTMLFormElement)) return;
+		articleForm.reset();
+		const idInput = articleForm.elements.namedItem('id');
+		const thumbnailUrlInput = articleForm.elements.namedItem('thumbnailUrl');
+		if (idInput instanceof HTMLInputElement) idInput.value = '';
+		if (thumbnailUrlInput instanceof HTMLInputElement) thumbnailUrlInput.value = '';
+	}
+
+	if (articleForm instanceof HTMLFormElement && articleStatus) {
+		articleForm.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			articleStatus.textContent = 'Menyimpan artikel...';
+
+			const data = new FormData(articleForm);
+			const idValue = parseInt(String(data.get('id') || ''), 10) || 0;
 			const title = String(data.get('title') || '').trim();
-			const description = String(data.get('description') || '').trim();
-			const projectUrl = String(data.get('projectUrl') || '').trim();
+			const excerpt = String(data.get('excerpt') || '').trim();
+			const content = String(data.get('content') || '').trim();
+			const existingThumbnail = String(data.get('thumbnailUrl') || '').trim();
+			const thumbnailFile = data.get('thumbnail');
 
-			let imageUrl = '';
-			const file = data.get('image');
-			if (file instanceof File && file.size > 0) {
+			let thumbnailUrl = existingThumbnail;
+
+			if (thumbnailFile instanceof File && thumbnailFile.size > 0) {
 				const uploadData = new FormData();
-				uploadData.append('file', file);
-
+				uploadData.append('file', thumbnailFile);
 				const uploadRes = await fetch('/api/upload', {
 					method: 'POST',
 					body: uploadData,
 				});
 
 				if (!uploadRes.ok) {
-					statusEl.textContent = 'Gagal upload gambar';
+					const uploadError = await uploadRes.json().catch(() => null);
+					articleStatus.textContent = uploadError?.error || 'Upload thumbnail gagal';
 					return;
 				}
 
 				const uploadBody = await uploadRes.json();
-				imageUrl = uploadBody.url || '';
+				thumbnailUrl = String(uploadBody.url || '');
 			}
 
-			const createRes = await fetch('/api/projects', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ title, description, projectUrl, imageUrl }),
-			});
-
-			if (!createRes.ok) {
-				statusEl.textContent = 'Gagal simpan project';
+			if (!thumbnailUrl) {
+				articleStatus.textContent = 'Thumbnail wajib diisi';
 				return;
 			}
 
-			statusEl.textContent = 'Berhasil disimpan, memuat ulang...';
+			const method = idValue > 0 ? 'PUT' : 'POST';
+			const payload = {
+				id: idValue,
+				title,
+				excerpt,
+				content,
+				thumbnailUrl,
+			};
+
+			const response = await fetch('/api/articles', {
+				method,
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload),
+			});
+
+			if (!response.ok) {
+				const errBody = await response.json().catch(() => null);
+				articleStatus.textContent = errBody?.error || 'Gagal menyimpan artikel';
+				return;
+			}
+
+			alert('Sukses! Artikel berhasil disimpan.');
 			window.location.reload();
 		});
 
 		document.querySelectorAll('.delete').forEach((button) => {
 			button.addEventListener('click', async () => {
+				const confirmDelete = confirm('Apakah Anda yakin ingin menghapus artikel ini?');
+				if (!confirmDelete) return;
+
 				const id = Number(button.getAttribute('data-id'));
 				if (!id) return;
 
-				const response = await fetch('/api/projects', {
+				const response = await fetch('/api/articles', {
 					method: 'DELETE',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ id }),
 				});
 
 				if (response.ok) {
+					alert('Sukses! Artikel berhasil dihapus.');
 					window.location.reload();
+				} else {
+					alert('Gagal menghapus artikel.');
 				}
 			});
+		});
+
+		document.querySelectorAll('.edit').forEach((button) => {
+			button.addEventListener('click', () => {
+				const idInput = articleForm.elements.namedItem('id');
+				const titleInput = articleForm.elements.namedItem('title');
+				const excerptInput = articleForm.elements.namedItem('excerpt');
+				const contentInput = articleForm.elements.namedItem('content');
+				const thumbnailUrlInput = articleForm.elements.namedItem('thumbnailUrl');
+
+				if (
+					!(idInput instanceof HTMLInputElement) ||
+					!(titleInput instanceof HTMLInputElement) ||
+					!(excerptInput instanceof HTMLTextAreaElement) ||
+					!(contentInput instanceof HTMLTextAreaElement) ||
+					!(thumbnailUrlInput instanceof HTMLInputElement)
+				) {
+					return;
+				}
+
+				idInput.value = button.getAttribute('data-id') || '';
+				titleInput.value = button.getAttribute('data-title') || '';
+				excerptInput.value = button.getAttribute('data-excerpt') || '';
+				contentInput.value = button.getAttribute('data-content') || '';
+				thumbnailUrlInput.value = button.getAttribute('data-thumbnail') || '';
+				articleStatus.textContent = 'Mode edit aktif. Upload thumbnail baru jika ingin mengganti gambar.';
+			});
+		});
+
+		if (resetButton instanceof HTMLButtonElement) {
+			resetButton.addEventListener('click', () => {
+				clearForm();
+				articleStatus.textContent = '';
+			});
+		}
+	}
+
+	if (logoutButton instanceof HTMLButtonElement) {
+		logoutButton.addEventListener('click', async () => {
+			await fetch('/api/admin/logout', { method: 'POST' });
+			window.location.reload();
 		});
 	}
 </script>
@@ -118,12 +270,23 @@ const projects = await getProjects();
 		margin-bottom: 8px;
 	}
 
-	form {
+	.panel {
 		background: white;
 		padding: 16px;
 		border-radius: 10px;
 		border: 1px solid #e5e7eb;
+		margin-bottom: 14px;
+	}
+
+	form {
 		display: grid;
+		gap: 12px;
+	}
+
+	.actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		gap: 12px;
 	}
 
@@ -147,6 +310,20 @@ const projects = await getProjects();
 		background: #111827;
 		color: white;
 		font-weight: 600;
+		width: fit-content;
+	}
+
+	button.light {
+		background: #334155;
+	}
+
+	button.danger,
+	button.delete {
+		background: #b91c1c;
+	}
+
+	button.edit {
+		background: #0369a1;
 	}
 
 	.list {
@@ -162,17 +339,18 @@ const projects = await getProjects();
 		border-radius: 8px;
 		padding: 10px;
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		justify-content: space-between;
+		gap: 12px;
 	}
 
-	.delete {
-		width: auto;
-		padding: 6px 10px;
-		background: #b91c1c;
+	.list p {
+		margin: 6px 0 0;
+		color: #4b5563;
 	}
 
-	#status {
+	#login-status,
+	#article-status {
 		margin: 0;
 		color: #4b5563;
 	}

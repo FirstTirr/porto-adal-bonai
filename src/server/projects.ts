@@ -1,4 +1,4 @@
-import { sql } from './db';
+import { getSql } from './db';
 
 export type Project = {
 	id: number;
@@ -10,6 +10,12 @@ export type Project = {
 };
 
 export async function getProjects(): Promise<Project[]> {
+	const sql = getSql();
+
+	if (!sql) {
+		return [];
+	}
+
 	return sql<Project[]>`
 		SELECT id, title, description, image_url, project_url, created_at
 		FROM projects
@@ -23,6 +29,12 @@ export async function createProject(input: {
 	imageUrl?: string;
 	projectUrl?: string;
 }): Promise<Project> {
+	const sql = getSql();
+
+	if (!sql) {
+		throw new Error('DATABASE_URL is missing. Set it in your environment variables.');
+	}
+
 	const [project] = await sql<Project[]>`
 		INSERT INTO projects (title, description, image_url, project_url)
 		VALUES (${input.title}, ${input.description ?? null}, ${input.imageUrl ?? null}, ${input.projectUrl ?? null})
@@ -33,5 +45,11 @@ export async function createProject(input: {
 }
 
 export async function deleteProject(id: number): Promise<void> {
+	const sql = getSql();
+
+	if (!sql) {
+		throw new Error('DATABASE_URL is missing. Set it in your environment variables.');
+	}
+
 	await sql`DELETE FROM projects WHERE id = ${id}`;
 }
