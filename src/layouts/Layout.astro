@@ -1,65 +1,143 @@
+---
+import '../styles/global.css';
+---
 <!doctype html>
-<html lang="id">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Adal Bonai Portfolio</title>
-	</head>
-	<body>
-		<header>
-			<nav>
-				<a href="/">Beranda</a>
-				<a href="/#about">About</a>
-				<a href="/#blog">Blog</a>
-				<a href="/admin">Admin</a>
-			</nav>
-		</header>
-		<main>
-			<slot />
-		</main>
-	</body>
+<html lang="id" class="scroll-smooth snap-y snap-mandatory h-full" style="color-scheme: light;">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="generator" content={Astro.generator} />
+<title>Adal Bonai Portfolio</title>
+</head>
+<body class="m-0 font-sans bg-slate-50 text-gray-900 h-full overflow-y-scroll snap-y snap-mandatory relative">
+<!-- Floating Navbar Pill (Desktop & Mobile) -->
+<header class="fixed top-4 inset-x-0 z-50 flex justify-center w-full px-4 pointer-events-none">
+<div class="pointer-events-auto relative w-full max-w-3xl">
+<!-- The Main Pill Nav -->
+<nav class="bg-white/70 backdrop-blur-md border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full px-6 py-3 flex items-center justify-between w-full h-[60px] transition-all duration-500 z-50 relative">
+<!-- Brand / Logo -->
+<a href="/" class="text-xl font-extrabold tracking-tighter text-teal-900 flex items-center gap-2 group decoration-transparent">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-800 flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-300">A</div>
+<span>Bonai</span>
+</a>
+
+<!-- Desktop Links -->
+<div class="hidden md:flex items-center gap-1 bg-white/50 p-1.5 rounded-full border border-white/60">
+<a href="/" class="text-sm font-bold px-4 py-1.5 rounded-full text-gray-700 hover:text-teal-800 hover:bg-white/80 transition-all decoration-transparent">Beranda</a>
+<a href="/#about" class="text-sm font-bold px-4 py-1.5 rounded-full text-gray-700 hover:text-teal-800 hover:bg-white/80 transition-all decoration-transparent">Tentang</a>
+<a href="/#photos" class="text-sm font-bold px-4 py-1.5 rounded-full text-gray-700 hover:text-teal-800 hover:bg-white/80 transition-all decoration-transparent">Galeri</a>
+<a href="/#blog" class="text-sm font-bold px-4 py-1.5 rounded-full text-gray-700 hover:text-teal-800 hover:bg-white/80 transition-all decoration-transparent">Blog</a>
+<a href="/admin" class="text-sm font-bold px-4 py-1.5 rounded-full text-gray-700 hover:text-teal-800 hover:bg-white/80 transition-all decoration-transparent">Admin</a>
+</div>
+
+<!-- Custom Hamburger (Mobile) -->
+<button id="menu-btn" class="md:hidden relative w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-[5px] overflow-hidden group z-50">
+<span class="w-5 h-[2px] bg-teal-900 rounded-full transform transition-all duration-300 origin-center group-hover:bg-teal-500"></span>
+<span class="w-5 h-[2px] bg-teal-900 rounded-full transform transition-all duration-300 origin-center group-hover:bg-teal-500 translate-x-1 group-hover:translate-x-0"></span>
+<span class="w-5 h-[2px] bg-teal-900 rounded-full transform transition-all duration-300 origin-center group-hover:bg-teal-500 -translate-x-1 group-hover:translate-x-0"></span>
+</button>
+</nav>
+
+<!-- Unique Full Screen / Clip-Path Menu Overlay -->
+<div id="mobile-menu-overlay" class="fixed inset-0 w-full h-[100dvh] bg-white/95 backdrop-blur-xl z-40 flex flex-col justify-center items-center pointer-events-none transition-all duration-500" style="clip-path: circle(0px at calc(100% - 44px) 34px);">
+<!-- Mobile Content Box -->
+<div id="mobile-menu-content" class="w-full flex-1 flex flex-col justify-center items-center opacity-0 transition-opacity duration-300">
+<div class="flex flex-col items-center gap-8 w-full px-8">
+<a href="/" class="mobile-link text-3xl font-extrabold text-teal-950 no-underline translate-y-8 opacity-0 transition-all duration-500 hover:text-teal-600 hover:scale-110">Beranda</a>
+<a href="/#about" class="mobile-link text-3xl font-extrabold text-teal-950 no-underline translate-y-8 opacity-0 transition-all duration-500 delay-[50ms] hover:text-teal-600 hover:scale-110">Tentang</a>
+<a href="/#photos" class="mobile-link text-3xl font-extrabold text-teal-950 no-underline translate-y-8 opacity-0 transition-all duration-500 delay-[100ms] hover:text-teal-600 hover:scale-110">Galeri</a>
+<a href="/#blog" class="mobile-link text-3xl font-extrabold text-teal-950 no-underline translate-y-8 opacity-0 transition-all duration-500 delay-[150ms] hover:text-teal-600 hover:scale-110">Blog</a>
+<a href="/admin" class="mobile-link text-3xl font-extrabold text-teal-950 no-underline translate-y-8 opacity-0 transition-all duration-500 delay-[200ms] hover:text-teal-600 hover:scale-110">Admin</a>
+</div>
+</div>
+
+<!-- Decorative Elements -->
+<div class="absolute bottom-10 inset-x-0 flex justify-center text-teal-200">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-[spin_6s_linear_infinite]"><path d="M12 2v20M17 5l-10 14M22 12H2M19 17L5 7"/></svg>
+</div>
+</div>
+</div>
+</header>
+
+<main class="w-full max-w-[1400px] mx-auto pt-24 pb-8 px-4 border-0">
+<slot />
+</main>
+
+<!-- Script for Hamburger Interaction -->
+<script is:inline>
+// Wrap in an IIFE to avoid global scope pollution
+(function() {
+const menuBtn = document.getElementById('menu-btn');
+const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+const mobileMenuContent = document.getElementById('mobile-menu-content');
+const mobileLinks = document.querySelectorAll('.mobile-link');
+const spans = menuBtn ? menuBtn.querySelectorAll('span') : [];
+let isOpen = false;
+
+function toggleMenu() {
+isOpen = !isOpen;
+
+// Toggle Hamburger Animation
+if (isOpen) {
+// Morph menu button to X
+if (spans.length >= 3) {
+spans[0].classList.add('rotate-45', 'translate-y-[7px]');
+spans[1].classList.add('opacity-0', 'scale-x-0');
+spans[1].classList.remove('translate-x-1');
+spans[2].classList.add('-rotate-45', '-translate-y-[7px]');
+spans[2].classList.remove('-translate-x-1');
+}
+
+// Expand circular mask
+mobileMenuOverlay.style.clipPath = 'circle(150% at calc(100% - 44px) 34px)';
+mobileMenuOverlay.classList.remove('pointer-events-none');
+mobileMenuOverlay.classList.add('pointer-events-auto');
+
+// Fade in content
+setTimeout(() => {
+mobileMenuContent.classList.remove('opacity-0');
+mobileLinks.forEach(link => {
+link.classList.remove('translate-y-8', 'opacity-0');
+});
+}, 200);
+
+} else {
+// Revert to hamburger
+if (spans.length >= 3) {
+spans[0].classList.remove('rotate-45', 'translate-y-[7px]');
+spans[1].classList.remove('opacity-0', 'scale-x-0');
+spans[1].classList.add('translate-x-1');
+spans[2].classList.remove('-rotate-45', '-translate-y-[7px]');
+spans[2].classList.add('-translate-x-1');
+}
+
+// Hide content
+mobileLinks.forEach(link => {
+link.classList.add('translate-y-8', 'opacity-0');
+});
+mobileMenuContent.classList.add('opacity-0');
+
+// Shrink circular mask
+mobileMenuOverlay.style.clipPath = 'circle(0px at calc(100% - 44px) 34px)';
+mobileMenuOverlay.classList.remove('pointer-events-auto');
+mobileMenuOverlay.classList.add('pointer-events-none');
+}
+}
+
+if (menuBtn && mobileMenuOverlay && mobileMenuContent) {
+menuBtn.addEventListener('click', toggleMenu);
+
+// Close menu when clicking a link
+mobileLinks.forEach(link => {
+link.addEventListener('click', () => {
+if (isOpen) {
+toggleMenu();
+}
+});
+});
+}
+})();
+</script>
+</body>
 </html>
-
-<style>
-	:root {
-		color-scheme: light;
-	}
-
-	body {
-		margin: 0;
-		font-family: Arial, sans-serif;
-		background: #ecfeff;
-		color: #111827;
-	}
-
-	header {
-		background: #083344;
-		border-bottom: 1px solid #134e4a;
-	}
-
-	nav {
-		max-width: 960px;
-		margin: 0 auto;
-		padding: 14px 16px;
-		display: flex;
-		gap: 16px;
-	}
-
-	a {
-		color: #f0fdfa;
-		text-decoration: none;
-		font-weight: 600;
-	}
-
-	a:hover {
-		text-decoration: underline;
-	}
-
-	main {
-		max-width: 960px;
-		margin: 24px auto;
-		padding: 0 16px 32px;
-	}
-</style>

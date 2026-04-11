@@ -53,3 +53,28 @@ export async function deleteProject(id: number): Promise<void> {
 
 	await sql`DELETE FROM projects WHERE id = ${id}`;
 }
+
+export async function updateProject(id: number, input: {
+title: string;
+description?: string;
+imageUrl?: string;
+projectUrl?: string;
+}): Promise<Project> {
+const sql = getSql();
+
+if (!sql) {
+throw new Error('DATABASE_URL is missing.');
+}
+
+const [project] = await sql<Project[]>`
+UPDATE projects
+SET title = ${input.title},
+description = ${input.description ?? null},
+image_url = ${input.imageUrl ?? null},
+project_url = ${input.projectUrl ?? null}
+WHERE id = ${id}
+RETURNING id, title, description, image_url, project_url, created_at
+`;
+
+return project;
+}

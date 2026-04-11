@@ -11,54 +11,17 @@ if (!article) {
 ---
 
 <Layout>
-	<article class="article-detail">
-		<p class="breadcrumb"><a href="/">← Kembali ke Beranda</a></p>
-		<h1>{article.title}</h1>
-		<img src={article.thumbnail_url} alt={article.title} />
-		<p class="meta">
+	<article class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm max-w-4xl mx-auto my-12">
+		<p class="mt-0 mb-4"><a href="/" class="text-teal-700 hover:text-teal-800 no-underline font-medium inline-flex items-center transition-colors">← Kembali ke Beranda</a></p>
+		<h1 class="m-0 mb-3 text-[34px] font-bold text-gray-900 leading-tight">{article.title}</h1>
+		<img src={article.thumbnail_url} alt={article.title} class="w-full h-[360px] object-cover rounded-xl mb-3" />
+		<p class="text-gray-500 text-sm mb-6 pb-6 border-b border-gray-100">
 			Dipublikasikan {new Date(article.created_at).toLocaleDateString('id-ID', {
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric',
 			})}
 		</p>
-		<div class="content">{article.content}</div>
+		<div class="whitespace-pre-wrap leading-[1.8] text-[17px] text-gray-800">{article.content}</div>
 	</article>
 </Layout>
-
-<style>
-	.article-detail {
-		background: white;
-		padding: 20px;
-		border-radius: 14px;
-		border: 1px solid #dbe4ef;
-	}
-
-	.breadcrumb {
-		margin-top: 0;
-	}
-
-	h1 {
-		margin: 0 0 12px;
-		font-size: 34px;
-	}
-
-	img {
-		width: 100%;
-		height: 360px;
-		object-fit: cover;
-		border-radius: 10px;
-		margin-bottom: 12px;
-	}
-
-	.meta {
-		color: #6b7280;
-		font-size: 14px;
-	}
-
-	.content {
-		white-space: pre-wrap;
-		line-height: 1.8;
-		font-size: 17px;
-	}
-</style>

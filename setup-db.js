@@ -33,6 +33,12 @@ async function setup() {
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   );`;
 
+  await sql`CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );`;
+
   console.log('Database setup complete!');
 }
 

@@ -1,357 +1,510 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { getArticles } from '../server/articles';
-import { isAdminAuthenticated } from '../server/admin-auth';
+import Layout from "../layouts/Layout.astro";
+import { getArticles } from "../server/articles";
+import { getProjects } from "../server/projects";
+import { getSettings } from "../server/settings";
+import { isAdminAuthenticated } from "../server/admin-auth";
 
 const authenticated = isAdminAuthenticated(Astro.cookies);
 const articles = authenticated ? await getArticles() : [];
+const projects = authenticated ? await getProjects() : [];
+const settings = authenticated ? await getSettings() : {};
+
+// Default settings
+const defaultSettings = {
+  home_badge: "Hello, I'm Adal Bonai",
+  home_title1: "Creative Explorer",
+  home_title2: "& Digital Creator",
+  home_desc: "Welcome to my digital space. I combine my passion for nature, fitness, and healthy living into digital creations and inspiring stories that motivate others to push their boundaries.",
+  home_img: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1200&q=80",
+  about_title: "The Story Behind <br/> The Lens & Code",
+  about_name: "Adal Bonai",
+  about_role: "Digital Wanderer",
+  about_location: "Based in Jakarta. I spend my weekdays writing code and designing interfaces, and my weekends hiking peaks and chasing trails.",
+  about_journey: "I am a digital creator who loves merging the spirit of outdoor exploration, fitness, and a healthy lifestyle into educational articles and portfolio works. My goal is to inspire others to live an active and fulfilling life through my digital projects.",
+  about_focus: "Whether I am building web experiences or capturing the morning fog on a mountain trail, I approach everything with a keen eye for detail, performance, and structure. Making the web beautiful step by step.",
+  about_img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80"
+};
+
+const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<string, string>)[key] || defaultSettings[key] || "";
 ---
 
 <Layout>
-	<h1>Admin Blog</h1>
-	<p>Login admin, lalu kelola artikel. Thumbnail wajib diisi.</p>
+  <div class="max-w-7xl mx-auto py-8 px-5 min-h-[85vh]">
+    {!authenticated ? (
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-w-md mx-auto mt-20">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Login Admin</h2>
+        <form id="login-form" class="grid gap-4">
+          <label class="grid gap-1.5 font-bold mb-1.5 text-slate-700">
+            Username
+            <input name="username" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" />
+          </label>
+          <label class="grid gap-1.5 font-bold mb-1.5 text-slate-700">
+            Password
+            <input name="password" type="password" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" />
+          </label>
+          <button type="submit" class="cursor-pointer w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-md mt-6">Login</button>
+          <p id="login-status" class="m-0 text-gray-600"></p>
+        </form>
+      </section>
+    ) : (
+      <div class="flex flex-col md:flex-row gap-8 items-start">
+        
+        <!-- SIDEBAR TABS (SPA MODE) -->
+        <div class="w-full md:w-64 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sticky top-8">
+          <div class="mb-6 px-2">
+            <h1 class="text-xl font-bold text-slate-900">Admin Panel</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage your portfolio</p>
+          </div>
+          
+          <nav class="flex flex-col gap-1" id="admin-tabs">
+            <button data-target="tab-home" class="tab-btn cursor-pointer w-full text-left px-4 py-3 text-sm rounded-xl font-bold transition-colors bg-teal-50 text-teal-700">🏠 Home Content</button>
+            <button data-target="tab-about" class="tab-btn cursor-pointer w-full text-left px-4 py-3 text-sm rounded-xl font-bold transition-colors text-slate-600 hover:bg-slate-50">👤 About Me</button>
+            <button data-target="tab-articles" class="tab-btn cursor-pointer w-full text-left px-4 py-3 text-sm rounded-xl font-bold transition-colors text-slate-600 hover:bg-slate-50">📝 Articles / Blog</button>
+            <button data-target="tab-projects" class="tab-btn cursor-pointer w-full text-left px-4 py-3 text-sm rounded-xl font-bold transition-colors text-slate-600 hover:bg-slate-50">📸 Bento Gallery</button>
+          </nav>
+          
+          <div class="mt-8 px-2 border-t border-slate-100 pt-4">
+            <button id="logout-button" class="w-full text-left px-2 py-2 text-sm text-red-600 font-bold hover:text-red-700 transition-colors flex items-center gap-2 cursor-pointer">
+              🚪 Logout
+            </button>
+          </div>
+        </div>
 
-	{!authenticated ? (
-		<section class="panel">
-			<h2>Login Admin</h2>
-			<form id="login-form">
-				<label>
-					Username
-					<input name="username" required />
-				</label>
-				<label>
-					Password
-					<input name="password" type="password" required />
-				</label>
-				<button type="submit">Login</button>
-				<p id="login-status"></p>
-			</form>
-		</section>
-	) : (
-		<>
-			<section class="panel">
-				<div class="actions">
-					<h2>Tambah / Edit Artikel</h2>
-					<button id="logout-button" class="danger" type="button">Logout</button>
-				</div>
-				<form id="article-form">
-					<input name="id" type="hidden" />
-					<label>
-						Judul
-						<input name="title" required />
-					</label>
-					<label>
-						Ringkasan
-						<textarea name="excerpt" rows="2" required></textarea>
-					</label>
-					<label>
-						Konten Artikel
-						<textarea name="content" rows="8" required></textarea>
-					</label>
-					<label>
-						Thumbnail (wajib, jpg/png/webp)
-						<input name="thumbnail" type="file" accept="image/jpeg,image/png,image/webp" />
-					</label>
-					<input name="thumbnailUrl" type="hidden" />
-					<button type="submit">Simpan Artikel</button>
-					<button id="reset-button" type="button" class="light">Reset Form</button>
-					<p id="article-status"></p>
-				</form>
-			</section>
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-grow w-full min-w-0">
+          
+          <!-- TAB: HOME -->
+          <div id="tab-home" class="tab-content block">
+            <section class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
+              <h2 class="text-xl font-bold text-slate-800 mb-6 border-b border-gray-100 pb-4">🏠 Edit Home Section</h2>
+              <form id="settings-home-form" class="grid gap-5">
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Badge Text (e.g. Hello, I'm Adal)
+                  <input name="home_badge" value={getSetting("home_badge")} class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    Header Part 1 (Black text)
+                    <input name="home_title1" value={getSetting("home_title1")} class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    Header Part 2 (Gradient text)
+                    <input name="home_title2" value={getSetting("home_title2")} class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                </div>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Description / Subtitle
+                  <textarea name="home_desc" rows="3" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none">{getSetting("home_desc")}</textarea>
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Hero Image URL
+                  <input name="home_img" type="file" accept="image/jpeg,image/png,image/webp" class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-teal-50 file:text-teal-700 cursor-pointer" />
+                  <input name="home_img_url" type="hidden" value={getSetting("home_img")} />
+                  <p class="text-xs text-slate-500 mt-1">Biarkan kosong jika tak ingin ubah gambar.</p>
+                </label>
+                <div class="mt-4 flex items-center">
+                  <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl transition-colors cursor-pointer">Save Home Content</button>
+                  <span class="settings-status ml-4 text-sm font-bold text-teal-600"></span>
+                </div>
+              </form>
+            </section>
+          </div>
 
-			<section class="panel">
-				<h2>Daftar Artikel</h2>
-				{articles.length === 0 ? (
-					<p>Belum ada artikel.</p>
-				) : (
-					<ul class="list">
-						{articles.map((article) => (
-							<li>
-								<div>
-									<strong>{article.title}</strong>
-									<p>{article.excerpt}</p>
-								</div>
-								<div class="actions">
-									<button
-										type="button"
-										class="edit"
-										data-id={article.id}
-										data-title={article.title}
-										data-excerpt={article.excerpt}
-										data-content={article.content}
-										data-thumbnail={article.thumbnail_url}
-									>
-										Edit
-									</button>
-									<button class="delete" type="button" data-id={article.id}>Hapus</button>
-								</div>
-							</li>
-						))}
-					</ul>
-				)}
-			</section>
-		</>
-	)}
+          <!-- TAB: ABOUT -->
+          <div id="tab-about" class="tab-content hidden">
+            <section class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
+              <h2 class="text-xl font-bold text-slate-800 mb-6 border-b border-gray-100 pb-4">👤 Edit About Section</h2>
+              <form id="settings-about-form" class="grid gap-5">
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Section Headline (HTML allowed, e.g. &lt;br/&gt;)
+                  <input name="about_title" value={getSetting("about_title")} class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    Your Name
+                    <input name="about_name" value={getSetting("about_name")} class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    Role / Subtitle
+                    <input name="about_role" value={getSetting("about_role")} class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                </div>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Profile Photo URL
+                  <input name="about_img" type="file" accept="image/jpeg,image/png,image/webp" class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-emerald-50 file:text-emerald-700 cursor-pointer" />
+                  <input name="about_img_url" type="hidden" value={getSetting("about_img")} />
+                  <p class="text-xs text-slate-500 mt-1">Biarkan kosong jika tak ingin ubah gambar profil.</p>
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Location / Base Info
+                  <textarea name="about_location" rows="2" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none">{getSetting("about_location")}</textarea>
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Journey Concept (Paragraph 1)
+                  <textarea name="about_journey" rows="3" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none">{getSetting("about_journey")}</textarea>
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Focus / Details (Paragraph 2)
+                  <textarea name="about_focus" rows="3" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none">{getSetting("about_focus")}</textarea>
+                </label>
+                <div class="mt-4 flex items-center">
+                  <button type="submit" class="bg-slate-900 border hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl transition-colors cursor-pointer">Save About Content</button>
+                  <span class="settings-status ml-4 text-sm font-bold text-emerald-600"></span>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <!-- TAB: ARTICLES -->
+          <div id="tab-articles" class="tab-content hidden space-y-6">
+            <section class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
+              <h2 class="text-xl font-bold text-slate-800 mb-6 border-b border-gray-100 pb-4">📝 Tambah / Edit Artikel</h2>
+              <form id="article-form" class="grid gap-4">
+                <input name="id" type="hidden" />
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Judul
+                  <input name="title" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Ringkasan
+                  <textarea name="excerpt" rows="2" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none"></textarea>
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Konten Artikel
+                  <textarea name="content" rows="8" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none"></textarea>
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Thumbnail (wajib, jpg/png/webp)
+                  <input name="thumbnail" type="file" accept="image/jpeg,image/png,image/webp" class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-teal-50 file:text-teal-700 cursor-pointer" />
+                </label>
+                <input name="thumbnailUrl" type="hidden" />
+                <div class="flex gap-3 mt-2">
+                  <button type="submit" class="bg-slate-900 border hover:bg-slate-800 text-white font-semibold py-2.5 px-6 rounded-lg cursor-pointer">Simpan Artikel</button>
+                  <button id="reset-button" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 px-6 rounded-lg cursor-pointer">Batal</button>
+                </div>
+                <p id="article-status" class="m-0 text-slate-500 font-medium"></p>
+              </form>
+            </section>
+
+            <section class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <h2 class="text-xl font-bold text-slate-800 mb-4">Daftar Artikel</h2>
+              <div class="overflow-y-auto max-h-[500px] pr-2">
+                {articles.length === 0 ? <p class="text-slate-500 italic">Belum ada artikel.</p> : (
+                  <ul class="grid gap-3 p-0 m-0">
+                    {articles.map((article) => (
+                      <li class="border border-slate-100 hover:border-slate-300 rounded-xl p-4 flex flex-col sm:flex-row justify-between gap-4 transition-colors">
+                        <div>
+                          <strong class="text-lg block mb-1">{article.title}</strong>
+                          <p class="text-slate-500 text-sm line-clamp-2 m-0">{article.excerpt}</p>
+                        </div>
+                        <div class="flex sm:flex-col gap-2 shrink-0">
+                          <button type="button" class="edit text-sm font-bold bg-slate-100 hover:bg-slate-200 py-1.5 px-4 rounded-lg cursor-pointer" data-id={article.id} data-title={article.title} data-excerpt={article.excerpt} data-content={article.content} data-thumbnail={article.thumbnail_url}>Edit</button>
+                          <button type="button" class="delete text-sm font-bold bg-red-50 hover:bg-red-100 text-red-600 py-1.5 px-4 rounded-lg cursor-pointer" data-id={article.id}>Hapus</button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+          </div>
+
+          <!-- TAB: PROJECTS / BENTO GALLERY -->
+          <div id="tab-projects" class="tab-content hidden space-y-6">
+             <section class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
+              <h2 class="text-xl font-bold text-slate-800 mb-6 border-b border-gray-100 pb-4">📸 Tambah / Edit Foto Bento Grid</h2>
+              <form id="project-form" class="grid gap-4">
+                <input name="project-id" type="hidden" />
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Judul Foto
+                  <input name="project-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  URL External (Opsional)
+                  <input name="project-url" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                </label>
+                <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                  Gambar (wajib, jpg/png/webp)
+                  <input name="project-image" type="file" accept="image/jpeg,image/png,image/webp" class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer" />
+                </label>
+                <input name="project-imageUrl" type="hidden" />
+                <div class="flex gap-3 mt-2">
+                  <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg cursor-pointer transition-colors">Simpan Foto</button>
+                  <button id="project-reset-button" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2.5 px-6 rounded-lg cursor-pointer transition-colors">Batal</button>
+                </div>
+                <p id="project-status" class="m-0 text-slate-500 font-medium"></p>
+              </form>
+            </section>
+
+            <section class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <h2 class="text-xl font-bold text-slate-800 mb-4">Daftar Foto / Karya</h2>
+              <div class="overflow-y-auto max-h-[500px] pr-2">
+                {projects.length === 0 ? <p class="text-slate-500 italic">Belum ada foto yang ditambahkan.</p> : (
+                  <ul class="grid gap-3 p-0 m-0">
+                    {projects.map((project) => (
+                      <li class="border border-slate-100 hover:border-slate-300 transition-colors rounded-xl p-4 flex flex-col sm:flex-row justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row gap-4 items-center sm:items-start text-center sm:text-left">
+                          {project.image_url && <img src={project.image_url} alt={project.title} class="w-24 h-16 sm:w-16 sm:h-16 rounded-lg object-cover shadow-sm" />}
+                          <div>
+                            <strong class="text-md sm:text-lg block mt-1 sm:mt-0 font-bold text-slate-800">{project.title}</strong>
+                            {project.project_url && <a href={project.project_url} target="_blank" class="text-indigo-600 font-medium text-xs sm:text-sm block mt-1 break-all hover:underline">{project.project_url}</a>}
+                          </div>
+                        </div>
+                        <div class="flex sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
+                          <button type="button" class="edit-project flex-1 text-sm font-bold bg-slate-100 hover:bg-slate-200 py-1.5 px-4 rounded-lg cursor-pointer" data-id={project.id} data-title={project.title} data-url={project.project_url || ''} data-image={project.image_url || ''}>Edit</button>
+                          <button type="button" class="delete-project flex-1 text-sm font-bold bg-red-50 hover:bg-red-100 text-red-600 py-1.5 px-4 rounded-lg cursor-pointer" data-id={project.id}>Hapus</button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </div>
+    )}
+  </div>
 </Layout>
 
 <script>
-	const loginForm = document.getElementById('login-form');
-	const loginStatus = document.getElementById('login-status');
+// SPA TABS LOGIC
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
 
-	if (loginForm instanceof HTMLFormElement && loginStatus) {
-		loginForm.addEventListener('submit', async (event) => {
-			event.preventDefault();
-			loginStatus.textContent = 'Memproses login...';
+if (tabBtns.length > 0) {
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // hide all items & un-focus buttons
+      tabContents.forEach(c => c.classList.add('hidden'));
+      tabBtns.forEach(b => {
+        b.classList.remove('bg-teal-50', 'text-teal-700');
+        b.classList.add('text-slate-600');
+      });
+      // Show correct items
+      const targetId = btn.getAttribute('data-target');
+      if (targetId) document.getElementById(targetId)?.classList.remove('hidden');
+      btn.classList.remove('text-slate-600');
+      btn.classList.add('bg-teal-50', 'text-teal-700');
+    });
+  });
+}
 
-			const data = new FormData(loginForm);
-			const response = await fetch('/api/admin/login', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					username: String(data.get('username') || ''),
-					password: String(data.get('password') || ''),
-				}),
-			});
+// SETTINGS (HOME & ABOUT) LOGIC
+async function saveSettingsForm(formEvent: Event, formElement: HTMLFormElement) {
+  formEvent.preventDefault();
+  const formData = new FormData(formElement);
+  const data = Object.fromEntries(formData.entries());
+  const statusEl = formElement.querySelector('.settings-status');
+  
+  if (statusEl) {
+    statusEl.textContent = 'Saving...';
+  }
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (statusEl) {
+      if (res.ok) {
+        statusEl.textContent = '✅ Saved successfully!';
+        setTimeout(() => statusEl.textContent = '', 3000);
+      } else {
+        statusEl.textContent = '❌ Failed to save.';
+      }
+    }
+  } catch (e) {
+    if (statusEl) statusEl.textContent = '⚠️ Network error.';
+  }
+}
 
-			if (!response.ok) {
-				loginStatus.textContent = 'Login gagal';
-				return;
-			}
+document.getElementById('settings-home-form')?.addEventListener('submit', (e) => saveSettingsForm(e, e.target as HTMLFormElement));
+document.getElementById('settings-about-form')?.addEventListener('submit', (e) => saveSettingsForm(e, e.target as HTMLFormElement));
 
-			window.location.reload();
-		});
-	}
 
-	const articleForm = document.getElementById('article-form');
-	const articleStatus = document.getElementById('article-status');
-	const resetButton = document.getElementById('reset-button');
-	const logoutButton = document.getElementById('logout-button');
+// --- FULL CRUD LOGIC BELOW ---
 
-	function clearForm() {
-		if (!(articleForm instanceof HTMLFormElement)) return;
-		articleForm.reset();
-		const idInput = articleForm.elements.namedItem('id');
-		const thumbnailUrlInput = articleForm.elements.namedItem('thumbnailUrl');
-		if (idInput instanceof HTMLInputElement) idInput.value = '';
-		if (thumbnailUrlInput instanceof HTMLInputElement) thumbnailUrlInput.value = '';
-	}
+const loginForm = document.getElementById('login-form');
+const loginStatus = document.getElementById('login-status');
 
-	if (articleForm instanceof HTMLFormElement && articleStatus) {
-		articleForm.addEventListener('submit', async (event) => {
-			event.preventDefault();
-			articleStatus.textContent = 'Menyimpan artikel...';
+if (loginForm instanceof HTMLFormElement && loginStatus) {
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    loginStatus.textContent = 'Memproses login...';
+    const data = new FormData(loginForm);
+    const response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: String(data.get('username') || ''),
+        password: String(data.get('password') || ''),
+      }),
+    });
+    if (!response.ok) { loginStatus.textContent = 'Login gagal'; return; }
+    window.location.reload();
+  });
+}
 
-			const data = new FormData(articleForm);
-			const idValue = parseInt(String(data.get('id') || ''), 10) || 0;
-			const title = String(data.get('title') || '').trim();
-			const excerpt = String(data.get('excerpt') || '').trim();
-			const content = String(data.get('content') || '').trim();
-			const existingThumbnail = String(data.get('thumbnailUrl') || '').trim();
-			const thumbnailFile = data.get('thumbnail');
+const logoutButton = document.getElementById('logout-button');
+if (logoutButton instanceof HTMLButtonElement) {
+  logoutButton.addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    window.location.reload();
+  });
+}
 
-			let thumbnailUrl = existingThumbnail;
+// ARTICLES
+const articleForm = document.getElementById('article-form') as HTMLFormElement | null;
+const articleStatus = document.getElementById('article-status');
+const resetButton = document.getElementById('reset-button');
 
-			if (thumbnailFile instanceof File && thumbnailFile.size > 0) {
-				const uploadData = new FormData();
-				uploadData.append('file', thumbnailFile);
-				const uploadRes = await fetch('/api/upload', {
-					method: 'POST',
-					body: uploadData,
-				});
+if (articleForm instanceof HTMLFormElement && articleStatus) {
+  articleForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    articleStatus.textContent = 'Menyimpan artikel...';
+    const data = new FormData(articleForm);
+    const idValue = parseInt(String(data.get('id') || ''), 10) || 0;
+    let thumbnailUrl = String(data.get('thumbnailUrl') || '').trim();
+    const thumbnailFile = data.get('thumbnail');
+    
+    if (thumbnailFile instanceof File && thumbnailFile.size > 0) {
+      const uploadData = new FormData(); uploadData.append('file', thumbnailFile);
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadData });
+      if (!uploadRes.ok) { articleStatus.textContent = 'Upload thumbnail gagal'; return; }
+      const uploadBody = await uploadRes.json();
+      thumbnailUrl = String(uploadBody.url || '');
+    }
+    
+    if (!thumbnailUrl) { articleStatus.textContent = 'Thumbnail wajib diisi'; return; }
+    
+    const payload = {
+      id: idValue,
+      title: String(data.get('title') || '').trim(),
+      excerpt: String(data.get('excerpt') || '').trim(),
+      content: String(data.get('content') || '').trim(),
+      thumbnailUrl,
+    };
+    const response = await fetch('/api/articles', {
+      method: idValue > 0 ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) { articleStatus.textContent = 'Gagal menyimpan artikel'; return; }
+    alert('Sukses menyimpan artikel!'); window.location.reload();
+  });
+}
 
-				if (!uploadRes.ok) {
-					const uploadError = await uploadRes.json().catch(() => null);
-					articleStatus.textContent = uploadError?.error || 'Upload thumbnail gagal';
-					return;
-				}
+document.querySelectorAll('.delete').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (!confirm('Hapus artikel ini?')) return;
+    const response = await fetch('/api/articles', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: Number(btn.getAttribute('data-id')) }),
+    });
+    if (response.ok) window.location.reload();
+  });
+});
 
-				const uploadBody = await uploadRes.json();
-				thumbnailUrl = String(uploadBody.url || '');
-			}
+document.querySelectorAll('.edit').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!articleForm || !articleStatus) return;
+    const f = articleForm.elements;
+    (f.namedItem('id') as HTMLInputElement).value = btn.getAttribute('data-id') || '';
+    (f.namedItem('title') as HTMLInputElement).value = btn.getAttribute('data-title') || '';
+    (f.namedItem('excerpt') as HTMLInputElement).value = btn.getAttribute('data-excerpt') || '';
+    (f.namedItem('content') as HTMLInputElement).value = btn.getAttribute('data-content') || '';
+    (f.namedItem('thumbnailUrl') as HTMLInputElement).value = btn.getAttribute('data-thumbnail') || '';
+    articleStatus.textContent = 'Mode edit aktif.';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    articleForm.style.border = "2px solid #0d9488";
+    setTimeout(() => { if(articleForm) articleForm.style.border = "none" }, 1500);
+  });
+});
 
-			if (!thumbnailUrl) {
-				articleStatus.textContent = 'Thumbnail wajib diisi';
-				return;
-			}
+if (resetButton) resetButton.addEventListener('click', () => { 
+  if (!articleForm) return;
+  articleForm.reset(); 
+  (articleForm.elements.namedItem('id') as HTMLInputElement).value=''; 
+  (articleForm.elements.namedItem('thumbnailUrl') as HTMLInputElement).value=''; 
+});
 
-			const method = idValue > 0 ? 'PUT' : 'POST';
-			const payload = {
-				id: idValue,
-				title,
-				excerpt,
-				content,
-				thumbnailUrl,
-			};
 
-			const response = await fetch('/api/articles', {
-				method,
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(payload),
-			});
+// PROJECTS BENTO
+const projectForm = document.getElementById('project-form') as HTMLFormElement | null;
+const projectStatus = document.getElementById('project-status');
+const projectResetButton = document.getElementById('project-reset-button');
 
-			if (!response.ok) {
-				const errBody = await response.json().catch(() => null);
-				articleStatus.textContent = errBody?.error || 'Gagal menyimpan artikel';
-				return;
-			}
+if (projectForm instanceof HTMLFormElement && projectStatus) {
+  projectForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    projectStatus.textContent = 'Menyimpan photo...';
+    const data = new FormData(projectForm);
+    const idValue = parseInt(String(data.get('project-id') || ''), 10) || 0;
+    let imageUrl = String(data.get('project-imageUrl') || '').trim();
+    const imageFile = data.get('project-image');
 
-			alert('Sukses! Artikel berhasil disimpan.');
-			window.location.reload();
-		});
+    if (imageFile instanceof File && imageFile.size > 0) {
+      const uploadData = new FormData(); uploadData.append('file', imageFile);
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadData });
+      if (!uploadRes.ok) { projectStatus.textContent = 'Upload gagal'; return; }
+      const uploadBody = await uploadRes.json();
+      imageUrl = String(uploadBody.url || '');
+    }
+    
+    if (!imageUrl) { projectStatus.textContent = 'Gambar wajib diisi'; return; }
+    
+    const payload = {
+      id: idValue,
+      title: String(data.get('project-title') || '').trim(),
+      projectUrl: String(data.get('project-url') || '').trim(),
+      imageUrl,
+    };
+    const response = await fetch('/api/projects', {
+      method: idValue > 0 ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) { projectStatus.textContent = 'Gagal menyimpan photo'; return; }
+    alert('Sukses menyimpan photo!'); window.location.reload();
+  });
+}
 
-		document.querySelectorAll('.delete').forEach((button) => {
-			button.addEventListener('click', async () => {
-				const confirmDelete = confirm('Apakah Anda yakin ingin menghapus artikel ini?');
-				if (!confirmDelete) return;
+document.querySelectorAll('.delete-project').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (!confirm('Hapus photo ini?')) return;
+    const response = await fetch('/api/projects', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: Number(btn.getAttribute('data-id')) }),
+    });
+    if (response.ok) window.location.reload();
+  });
+});
 
-				const id = Number(button.getAttribute('data-id'));
-				if (!id) return;
+document.querySelectorAll('.edit-project').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!projectForm || !projectStatus) return;
+    const f = projectForm.elements;
+    (f.namedItem('project-id') as HTMLInputElement).value = btn.getAttribute('data-id') || '';
+    (f.namedItem('project-title') as HTMLInputElement).value = btn.getAttribute('data-title') || '';
+    (f.namedItem('project-url') as HTMLInputElement).value = btn.getAttribute('data-url') || '';
+    (f.namedItem('project-imageUrl') as HTMLInputElement).value = btn.getAttribute('data-image') || '';
+    projectStatus.textContent = 'Mode edit aktif.';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    projectForm.style.border = "2px solid #4f46e5";
+    setTimeout(() => { if(projectForm) projectForm.style.border = "none" }, 1500);
+  });
+});
 
-				const response = await fetch('/api/articles', {
-					method: 'DELETE',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ id }),
-				});
+if (projectResetButton) projectResetButton.addEventListener('click', () => { 
+  if (!projectForm) return;
+  projectForm.reset(); 
+  (projectForm.elements.namedItem('project-id') as HTMLInputElement).value=''; 
+  (projectForm.elements.namedItem('project-imageUrl') as HTMLInputElement).value=''; 
+});
 
-				if (response.ok) {
-					alert('Sukses! Artikel berhasil dihapus.');
-					window.location.reload();
-				} else {
-					alert('Gagal menghapus artikel.');
-				}
-			});
-		});
-
-		document.querySelectorAll('.edit').forEach((button) => {
-			button.addEventListener('click', () => {
-				const idInput = articleForm.elements.namedItem('id');
-				const titleInput = articleForm.elements.namedItem('title');
-				const excerptInput = articleForm.elements.namedItem('excerpt');
-				const contentInput = articleForm.elements.namedItem('content');
-				const thumbnailUrlInput = articleForm.elements.namedItem('thumbnailUrl');
-
-				if (
-					!(idInput instanceof HTMLInputElement) ||
-					!(titleInput instanceof HTMLInputElement) ||
-					!(excerptInput instanceof HTMLTextAreaElement) ||
-					!(contentInput instanceof HTMLTextAreaElement) ||
-					!(thumbnailUrlInput instanceof HTMLInputElement)
-				) {
-					return;
-				}
-
-				idInput.value = button.getAttribute('data-id') || '';
-				titleInput.value = button.getAttribute('data-title') || '';
-				excerptInput.value = button.getAttribute('data-excerpt') || '';
-				contentInput.value = button.getAttribute('data-content') || '';
-				thumbnailUrlInput.value = button.getAttribute('data-thumbnail') || '';
-				articleStatus.textContent = 'Mode edit aktif. Upload thumbnail baru jika ingin mengganti gambar.';
-			});
-		});
-
-		if (resetButton instanceof HTMLButtonElement) {
-			resetButton.addEventListener('click', () => {
-				clearForm();
-				articleStatus.textContent = '';
-			});
-		}
-	}
-
-	if (logoutButton instanceof HTMLButtonElement) {
-		logoutButton.addEventListener('click', async () => {
-			await fetch('/api/admin/logout', { method: 'POST' });
-			window.location.reload();
-		});
-	}
 </script>
-
-<style>
-	h1 {
-		margin-bottom: 8px;
-	}
-
-	.panel {
-		background: white;
-		padding: 16px;
-		border-radius: 10px;
-		border: 1px solid #e5e7eb;
-		margin-bottom: 14px;
-	}
-
-	form {
-		display: grid;
-		gap: 12px;
-	}
-
-	.actions {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 12px;
-	}
-
-	label {
-		display: grid;
-		gap: 6px;
-		font-weight: 600;
-	}
-
-	input,
-	textarea,
-	button {
-		font: inherit;
-		padding: 10px;
-		border-radius: 8px;
-		border: 1px solid #d1d5db;
-	}
-
-	button {
-		cursor: pointer;
-		background: #111827;
-		color: white;
-		font-weight: 600;
-		width: fit-content;
-	}
-
-	button.light {
-		background: #334155;
-	}
-
-	button.danger,
-	button.delete {
-		background: #b91c1c;
-	}
-
-	button.edit {
-		background: #0369a1;
-	}
-
-	.list {
-		list-style: none;
-		padding: 0;
-		display: grid;
-		gap: 8px;
-	}
-
-	.list li {
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		padding: 10px;
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 12px;
-	}
-
-	.list p {
-		margin: 6px 0 0;
-		color: #4b5563;
-	}
-
-	#login-status,
-	#article-status {
-		margin: 0;
-		color: #4b5563;
-	}
-</style>

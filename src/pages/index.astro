@@ -2,171 +2,238 @@
 import Layout from '../layouts/Layout.astro';
 import { getProjects } from '../server/projects';
 import { getArticles } from '../server/articles';
+import { getSettings } from '../server/settings';
 
 const projects = await getProjects();
 const articles = await getArticles();
+const settings = await getSettings();
+
+const getSetting = (key: string, defaultValue: string = '') => settings[key] || defaultValue;
+
+const homeBadge = getSetting("home_badge", "Welcome");
+const homeTitle1 = getSetting("home_title1", "Hi, I'm");
+const homeTitle2 = getSetting("home_title2", "A Creative Professional");
+const homeDesc = getSetting("home_desc", "I craft modern, aesthetic, and functional digital experiences.");
+const homeImg = getSetting("home_img", "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&q=80&w=800");
+
+const aboutTitle = getSetting("about_title", "About Me");
+const aboutName = getSetting("about_name", "Author");
+const aboutRole = getSetting("about_role", "Creator");
+const aboutImg = getSetting("about_img", "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800");
+const aboutLocation = getSetting("about_location", "Global");
+const aboutJourney = getSetting("about_journey", "My journey is fueled by passion and continuous learning.");
+const aboutFocus = getSetting("about_focus", "I focus on delivering high impact results.");
 ---
 
 <Layout>
-	<section class="hero">
-		<p class="eyebrow">Portfolio Adal Bonai</p>
-		<h1>Petualangan Sehat untuk Jiwa dan Raga</h1>
-		<p class="subtitle">
-			Website ini berisi perjalanan proyek bertema petualangan dan kesehatan, plus artikel inspiratif
-			untuk gaya hidup aktif.
-		</p>
-	</section>
+  <!-- Background Decorative Blobs -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[#fafafa]">
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-300/20 blur-[120px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-300/20 blur-[120px]"></div>
+  </div>
 
-	<section id="about" class="section">
-		<h2>About Adal Bonai</h2>
-		<p>
-			Adal Bonai adalah kreator digital yang menggabungkan semangat eksplorasi alam, kebugaran, dan
-			cerita hidup sehat ke dalam karya portofolio dan artikel edukatif.
-		</p>
-	</section>
+  <!-- Full Screen Snap Container -->
+  <div class="relative z-10 h-[100dvh] w-full overflow-y-scroll overflow-x-hidden snap-y snap-mandatory font-sans selection:bg-indigo-500/30 scroll-smooth">
+    
+    <!-- Modern Floating Navbar -->
+    <header class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50 flex justify-between items-center px-6 md:px-8 py-4 bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full transition-all duration-300">
+      <div class="text-slate-900 font-black text-xl tracking-tighter flex items-center gap-1">
+        {aboutName}<span class="text-indigo-500 text-2xl leading-none">.</span>
+      </div>
+      <nav class="hidden md:flex gap-8 text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">
+        <a href="#home" class="hover:text-indigo-600 transition-colors cursor-pointer">Home</a>
+        <a href="#about" class="hover:text-indigo-600 transition-colors cursor-pointer">About</a>
+        <a href="#gallery" class="hover:text-indigo-600 transition-colors cursor-pointer">Work</a>
+        <a href="#journal" class="hover:text-indigo-600 transition-colors cursor-pointer">Journal</a>
+      </nav>
+      <div class="md:hidden flex items-center">
+        <svg class="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </div>
+    </header>
 
-	<section class="section">
-		<h2>Project Pilihan</h2>
-		{projects.length === 0 ? (
-			<p class="empty">Belum ada project. Tambahkan dari halaman admin.</p>
-		) : (
-			<div class="grid">
-				{projects.map((project) => (
-					<article class="card">
-						{project.image_url ? (
-							<img src={project.image_url} alt={project.title} loading="lazy" />
-						) : (
-							<div class="placeholder">Tanpa Gambar</div>
-						)}
-						<h3>{project.title}</h3>
-						{project.description ? <p>{project.description}</p> : null}
-						{project.project_url ? (
-							<a href={project.project_url} target="_blank" rel="noreferrer">Lihat Project</a>
-						) : null}
-					</article>
-				))}
-			</div>
-		)}
-	</section>
+    <!-- AREA 1: HOME -->
+    <section id="home" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+      <div class="max-w-[1400px] w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="flex flex-col z-10 w-full order-2 lg:order-1">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm w-fit mb-8">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs font-bold tracking-widest uppercase text-slate-600">{homeBadge}</span>
+          </div>
+          <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 tracking-tighter leading-[0.9] mb-6">
+            <span class="bg-clip-text text-transparent bg-gradient-to-br from-slate-900 to-slate-500">{homeTitle1}</span>
+            <span class="block text-indigo-600 mt-2 font-bold tracking-tight">{homeTitle2}</span>
+          </h1>
+          <p class="text-base md:text-xl text-slate-500 leading-relaxed max-w-lg mb-10 font-normal">
+            {homeDesc}
+          </p>
+          <div class="flex flex-wrap gap-5 items-center">
+            <a href="#gallery" class="px-8 py-4 bg-slate-900 text-white font-bold rounded-full hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 transition-all duration-300 text-sm flex items-center gap-2 group">
+              Explore Work
+              <span class="group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+          </div>
+        </div>
+        
+        <div class="flex justify-center relative order-1 lg:order-2 w-full max-w-[450px] lg:max-w-[500px] mx-auto">
+          <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 rounded-3xl blur-2xl transform rotate-3"></div>
+          <div class="w-full aspect-square bg-white rounded-3xl p-2 overflow-hidden relative shadow-2xl z-10 group border border-white/50 backdrop-blur-sm transition-transform duration-700 hover:scale-[1.02]">
+             <img src={homeImg} alt="Hero" class="w-full h-full object-cover rounded-2xl grayscale-[10%] group-hover:grayscale-0 transition-all duration-1000" />
+          </div>
+        </div>
+      </div>
+    </section>
 
-	<section id="blog" class="section">
-		<h2>Blog & Artikel</h2>
-		{articles.length === 0 ? (
-			<p class="empty">Belum ada artikel. Tambahkan dari halaman admin.</p>
-		) : (
-			<div class="grid">
-				{articles.map((article) => (
-					<article class="card">
-						<img src={article.thumbnail_url} alt={article.title} loading="lazy" />
-						<h3>{article.title}</h3>
-						<p>{article.excerpt}</p>
-						<a href={`/blog/${article.slug}`}>Baca Artikel</a>
-					</article>
-				))}
-			</div>
-		)}
-	</section>
+    <!-- AREA 2: ABOUT -->
+    <section id="about" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+      <div class="max-w-[1400px] w-full h-full max-h-[850px] flex flex-col justify-center">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+          <div class="hidden lg:block lg:col-span-4 relative group w-full">
+             <div class="absolute -inset-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl opacity-20 group-hover:opacity-40 blur-lg transition-opacity duration-500"></div>
+             <div class="relative h-full w-full aspect-square rounded-3xl overflow-hidden border-4 border-white shadow-2xl">
+               <img src={aboutImg} alt={aboutName} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+               <div class="absolute bottom-6 left-6 right-6 bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-white/50">
+                 <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">{aboutRole}</p>
+                 <p class="text-sm font-medium text-slate-800">{aboutLocation}</p>
+               </div>
+             </div>
+          </div>
+          
+          <div class="lg:col-span-8 flex flex-col justify-center">
+            <div class="mb-8">
+              <span class="text-indigo-600 font-extrabold text-xs uppercase tracking-[0.2em] block mb-3">{aboutTitle}</span>
+              <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter">{aboutName}</h2>
+            </div>
+            
+            <div class="bg-white/60 backdrop-blur-xl border border-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 relative overflow-hidden">
+               <div class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-purple-500"></div>
+               
+               <h3 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 tracking-tight">The Journey</h3>
+               <p class="text-base md:text-lg text-slate-600 leading-relaxed font-normal whitespace-pre-line mb-8">
+                 {aboutJourney}
+               </p>
+               
+               <div class="w-full h-[1px] bg-slate-200 my-8"></div>
+
+               <h3 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 tracking-tight">Main Focus</h3>
+               <p class="text-base md:text-lg text-slate-600 leading-relaxed font-normal whitespace-pre-line">
+                 {aboutFocus}
+               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AREA 3: GALLERY (BENTO) -->
+    <section id="gallery" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+      <div class="max-w-[1400px] w-full h-full max-h-[900px] flex flex-col justify-center">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 shrink-0">
+          <div>
+            <span class="text-indigo-600 font-extrabold text-xs uppercase tracking-[0.2em] block mb-3">Selected Work</span>
+            <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter">Gallery Grid</h2>
+          </div>
+          <p class="text-slate-500 max-w-sm mt-4 md:mt-0 text-sm md:text-base md:text-right font-medium">
+            A highly curated collection of moments and visuals.
+          </p>
+        </div>
+
+        {projects.length === 0 ? (
+          <div class="w-full flex-1 border-2 border-slate-200 border-dashed rounded-[3rem] flex items-center justify-center font-bold text-slate-400">
+            No gallery projects published yet.
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 lg:gap-6 flex-1 min-h-0">
+            {projects.slice(0, 5).map((project, index, arr) => {
+              let spanClass = "col-span-1 row-span-1";
+              let titleSize = "text-xl md:text-2xl lg:text-3xl";
+              
+              const totalItems = arr.length;
+              if (totalItems >= 5) {
+                if (index === 0) { spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl"; }
+              } else if (totalItems === 4) {
+                if (index === 0) { spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl"; }
+                else if (index === 1) { spanClass = "md:col-span-2 md:row-span-1"; titleSize = "text-2xl md:text-3xl"; }
+              } else if (totalItems === 3) {
+                if (index === 0) { spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl"; }
+                else if (index === 1 || index === 2) { spanClass = "md:col-span-2 md:row-span-1"; titleSize = "text-2xl md:text-3xl"; }
+              } else if (totalItems === 2) {
+                spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl";
+              } else {
+                spanClass = "md:col-span-4 md:row-span-2"; titleSize = "text-4xl md:text-6xl";
+              }
+              
+              return (
+                <div class={`group relative rounded-3xl md:rounded-[2.5rem] overflow-hidden bg-slate-100 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 block ${spanClass} border border-white/50`}>
+                  <img src={project.image_url || 'https://images.unsplash.com/photo-1469474968028?w=800'} alt={project.title} class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                  
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
+                  
+                  <div class="absolute inset-0 p-6 md:p-10 flex flex-col justify-end z-20">
+                    <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                      <h3 class={`text-white font-black tracking-tight leading-tight ${titleSize} mb-2`}>{project.title}</h3>
+                      {project.description && (
+                        <p class="text-slate-300 text-sm line-clamp-2 md:opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 font-medium">{project.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- AREA 4: BLOG / JOURNAL -->
+    <section id="journal" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+      <div class="max-w-[1400px] w-full h-full max-h-[900px] flex flex-col justify-center">
+        <div class="mb-10 lg:mb-16 text-center flex flex-col items-center shrink-0">
+          <span class="text-indigo-600 font-extrabold text-xs uppercase tracking-[0.2em] block mb-3">Thoughts & Journeys</span>
+          <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter">The Journal</h2>
+        </div>
+
+        {articles.length === 0 ? (
+           <div class="w-full flex-1 border-2 border-slate-200 border-dashed rounded-[3rem] flex items-center justify-center font-bold text-slate-400">
+             No journal entries published.
+           </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 flex-1 overflow-y-auto md:overflow-visible pb-10 md:pb-0 min-h-0">
+            {articles.slice(0,3).map((article) => (
+              <a href={`/blog/${article.slug}`} class="group flex flex-col bg-white rounded-[2.5rem] overflow-hidden hover:shadow-[0_20px_50px_rgb(0,0,0,0.06)] transition-all duration-500 border border-slate-100/80 hover:-translate-y-2 h-full">
+                <div class="w-full aspect-[4/3] shrink-0 overflow-hidden relative bg-slate-100 p-3">
+                  <div class="w-full h-full rounded-3xl overflow-hidden relative">
+                    <img src={article.thumbnail_url || 'https://images.unsplash.com/photo-1499750310107?w=800'} alt={article.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-500"></div>
+                  </div>
+                  <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-indigo-600 shadow-sm">
+                    Read
+                  </div>
+                </div>
+                
+                <div class="p-8 flex flex-col flex-1">
+                  <h3 class="text-xl lg:text-2xl font-black text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors leading-tight line-clamp-2">
+                    {article.title}
+                  </h3>
+                  <p class="text-slate-500 text-sm line-clamp-3 leading-relaxed mb-6 flex-1 font-medium">
+                    {article.excerpt}
+                  </p>
+                  <div class="text-slate-800 font-bold text-sm uppercase tracking-widest flex items-center gap-2 mt-auto">
+                    Read Article <span class="group-hover:translate-x-2 transition-transform duration-300 text-indigo-600">→</span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+
+  </div>
 </Layout>
 
 <style>
-	.hero {
-		background: linear-gradient(135deg, #0f766e, #0c4a6e);
-		color: #fff;
-		padding: 26px;
-		border-radius: 16px;
-		margin-bottom: 18px;
-	}
-
-	.eyebrow {
-		margin: 0;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		font-size: 12px;
-		font-weight: 700;
-		opacity: 0.85;
-	}
-
-	h1 {
-		margin: 8px 0;
-		font-size: 38px;
-	}
-
-	.subtitle {
-		margin: 0;
-		max-width: 760px;
-		font-size: 17px;
-		line-height: 1.7;
-	}
-
-	.section {
-		margin: 18px 0;
-	}
-
-	h2 {
-		font-size: 28px;
-		margin: 0 0 10px;
-	}
-
-	p {
-		margin: 0;
-		color: #4b5563;
-		line-height: 1.7;
-	}
-
-	.empty {
-		padding: 12px;
-		background: #f8fafc;
-		border: 1px solid #e2e8f0;
-		border-radius: 10px;
-	}
-
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-		gap: 14px;
-		margin-top: 12px;
-	}
-
-	.card {
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 10px;
-		padding: 12px;
-	}
-
-	img,
-	.placeholder {
-		width: 100%;
-		height: 160px;
-		border-radius: 8px;
-		object-fit: cover;
-		background: #e5e7eb;
-	}
-
-	.placeholder {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 14px;
-		color: #6b7280;
-	}
-
-	h2 {
-		margin: 12px 0 6px;
-	}
-
-	h3 {
-		margin: 12px 0 6px;
-		font-size: 21px;
-	}
-
-	.card p {
-		min-height: 40px;
-	}
-
-	.card a {
-		display: inline-block;
-		margin-top: 8px;
-		color: #0f766e;
-	}
+  html, body {
+    overflow: hidden;
+  }
 </style>
