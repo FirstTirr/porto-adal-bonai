@@ -51,7 +51,15 @@ const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<st
       <div class="flex flex-col md:flex-row gap-8 items-start">
         
         <!-- SIDEBAR TABS (SPA MODE) -->
-        <div class="w-full md:w-64 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sticky top-8">
+        <!-- SIDEBAR TABS (SPA MODE) -->
+        <div class="w-full md:w-64 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:sticky md:top-8 relative transition-all duration-300" id="admin-sidebar">
+          
+          <!-- MOBILE TOGGLE BUTTON -->
+          <button id="mobile-sidebar-toggle" class="md:hidden absolute right-4 top-4 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg p-2 font-bold text-sm flex items-center justify-center transition-colors z-10">
+            <span id="toggle-icon">Tutup Menu</span>
+          </button>
+          
+          <div id="admin-sidebar-content" class="transition-all duration-300 overflow-hidden">
           <div class="mb-6 px-2">
             <h1 class="text-xl font-bold text-slate-900">Admin Panel</h1>
             <p class="text-xs text-slate-500 mt-1">Manage your portfolio</p>
@@ -69,6 +77,8 @@ const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<st
               🚪 Logout
             </button>
           </div>
+        </div>
+
         </div>
 
         <!-- MAIN CONTENT AREA -->
@@ -221,7 +231,7 @@ const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<st
                   <input name="project-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
                 </label>
                 <label class="grid gap-1.5 font-bold text-sm text-slate-700">
-                  URL External (Opsional)
+                  URL External (Opsional, ketik - Jika tidak ada)
                   <input name="project-url" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
                 </label>
                 <label class="grid gap-1.5 font-bold text-sm text-slate-700">
@@ -270,6 +280,38 @@ const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<st
 </Layout>
 
 <script>
+
+// MOBILE SIDEBAR TOGGLE
+const sidebarToggle = document.getElementById('mobile-sidebar-toggle');
+const sidebarContent = document.getElementById('admin-sidebar-content');
+const toggleIcon = document.getElementById('toggle-icon');
+
+if (sidebarToggle && sidebarContent && toggleIcon) {
+  sidebarToggle.addEventListener('click', () => {
+    const isHidden = sidebarContent.classList.contains('hidden');
+    if (isHidden) {
+      // Expand
+      sidebarContent.classList.remove('hidden');
+      toggleIcon.textContent = 'Tutup Menu';
+    } else {
+      // Collapse
+      sidebarContent.classList.add('hidden');
+      toggleIcon.textContent = 'Buka Menu';
+    }
+  });
+
+  // Auto-collapse sidebar on mobile when a tab is clicked
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth < 768) { // Only collapse on mobile screens
+        sidebarContent.classList.add('hidden');
+        toggleIcon.textContent = 'Buka Menu';
+      }
+    });
+  });
+}
+
 // SPA TABS LOGIC
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
@@ -295,13 +337,67 @@ if (tabBtns.length > 0) {
 // SETTINGS (HOME & ABOUT) LOGIC
 async function saveSettingsForm(formEvent: Event, formElement: HTMLFormElement) {
   formEvent.preventDefault();
-  const formData = new FormData(formElement);
-  const data = Object.fromEntries(formData.entries());
   const statusEl = formElement.querySelector('.settings-status');
+  if (statusEl) statusEl.textContent = 'Menyimpan...';
   
-  if (statusEl) {
-    statusEl.textContent = 'Saving...';
+  const formData = new FormData(formElement);
+  const data = Object.fromEntries(formData.entries()) as Record<string, string>;
+  
+  // Handle Home Img Upload
+  if (formData.has('home_img')) {
+     const file = formData.get('home_img') as File;
+     if (file && file.size > 0) {
+        statusEl!.textContent = 'Mengunggah gambar hero...';
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+        try {
+           const res = await fetch('/api/upload', { method: 'POST', body: uploadData });
+           if (res.ok) {
+              const body = await res.json();
+              data['home_img'] = body.url;
+           } else {
+              data['home_img'] = formData.get('home_img_url') as string;
+           }
+        } catch {
+             data['home_img'] = formData.get('home_img_url') as string;
+        }
+     } else {
+         data['home_img'] = formData.get('home_img_url') as string;
+     }
   }
+  
+  // Handle About Img Upload
+  if (formData.has('about_img')) {
+     const file = formData.get('about_img') as File;
+     if (file && file.size > 0) {
+        statusEl!.textContent = 'Mengunggah gambar about...';
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+        try{
+            const res = await fetch('/api/upload', { method: 'POST', body: uploadData });
+            if (res.ok) {
+               const body = await res.json();
+               data['about_img'] = body.url;
+            } else {
+               data['about_img'] = formData.get('about_img_url') as string;
+            }
+        } catch {
+            data['about_img'] = formData.get('about_img_url') as string;
+        }
+     } else {
+         data['about_img'] = formData.get('about_img_url') as string;
+     }
+  }
+
+  // Remove File objects so they don't break JSON.stringify
+  delete data['home_img_url'];
+  delete data['about_img_url'];
+  Object.keys(data).forEach(key => {
+    if (typeof data[key] !== 'string') {
+        data[key] = String(data[key]);
+    }
+  });
+
   try {
     const res = await fetch('/api/settings', {
       method: 'POST',

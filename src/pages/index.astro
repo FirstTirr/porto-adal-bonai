@@ -33,26 +33,10 @@ const aboutFocus = getSetting("about_focus", "I focus on delivering high impact 
   </div>
 
   <!-- Full Screen Snap Container -->
-  <div class="relative z-10 h-[100dvh] w-full overflow-y-scroll overflow-x-hidden snap-y snap-mandatory font-sans selection:bg-indigo-500/30 scroll-smooth">
+  <div class="relative z-10 w-full overflow-x-hidden font-sans selection:bg-indigo-500/30 scroll-smooth">
     
-    <!-- Modern Floating Navbar -->
-    <header class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50 flex justify-between items-center px-6 md:px-8 py-4 bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-full transition-all duration-300">
-      <div class="text-slate-900 font-black text-xl tracking-tighter flex items-center gap-1">
-        {aboutName}<span class="text-indigo-500 text-2xl leading-none">.</span>
-      </div>
-      <nav class="hidden md:flex gap-8 text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">
-        <a href="#home" class="hover:text-indigo-600 transition-colors cursor-pointer">Home</a>
-        <a href="#about" class="hover:text-indigo-600 transition-colors cursor-pointer">About</a>
-        <a href="#gallery" class="hover:text-indigo-600 transition-colors cursor-pointer">Work</a>
-        <a href="#journal" class="hover:text-indigo-600 transition-colors cursor-pointer">Journal</a>
-      </nav>
-      <div class="md:hidden flex items-center">
-        <svg class="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-      </div>
-    </header>
-
     <!-- AREA 1: HOME -->
-    <section id="home" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+    <section id="home" class="w-full min-h-screen flex items-center justify-center relative px-6 md:px-12 pt-20 pb-10">
       <div class="max-w-[1400px] w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div class="flex flex-col z-10 w-full order-2 lg:order-1">
           <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm w-fit mb-8">
@@ -84,7 +68,7 @@ const aboutFocus = getSetting("about_focus", "I focus on delivering high impact 
     </section>
 
     <!-- AREA 2: ABOUT -->
-    <section id="about" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+    <section id="about" class="w-full min-h-screen flex items-center justify-center relative px-6 md:px-12 pt-20 pb-10">
       <div class="max-w-[1400px] w-full h-full max-h-[850px] flex flex-col justify-center">
         
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -125,16 +109,16 @@ const aboutFocus = getSetting("about_focus", "I focus on delivering high impact 
       </div>
     </section>
 
-    <!-- AREA 3: GALLERY (BENTO) -->
-    <section id="gallery" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+    <!-- AREA 3: GALLERY -->
+    <section id="gallery" class="w-full min-h-screen flex items-center justify-center relative px-6 md:px-12 pt-20 pb-10">
       <div class="max-w-[1400px] w-full h-full max-h-[900px] flex flex-col justify-center">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 shrink-0">
           <div>
             <span class="text-indigo-600 font-extrabold text-xs uppercase tracking-[0.2em] block mb-3">Selected Work</span>
-            <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter">Gallery Grid</h2>
+            <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter">Gallery</h2>
           </div>
           <p class="text-slate-500 max-w-sm mt-4 md:mt-0 text-sm md:text-base md:text-right font-medium">
-            A highly curated collection of moments and visuals.
+            Koleksi lengkap momen dan visual.
           </p>
         </div>
 
@@ -143,50 +127,36 @@ const aboutFocus = getSetting("about_focus", "I focus on delivering high impact 
             No gallery projects published yet.
           </div>
         ) : (
-          <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 lg:gap-6 flex-1 min-h-0">
-            {projects.slice(0, 5).map((project, index, arr) => {
-              let spanClass = "col-span-1 row-span-1";
-              let titleSize = "text-xl md:text-2xl lg:text-3xl";
-              
-              const totalItems = arr.length;
-              if (totalItems >= 5) {
-                if (index === 0) { spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl"; }
-              } else if (totalItems === 4) {
-                if (index === 0) { spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl"; }
-                else if (index === 1) { spanClass = "md:col-span-2 md:row-span-1"; titleSize = "text-2xl md:text-3xl"; }
-              } else if (totalItems === 3) {
-                if (index === 0) { spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl"; }
-                else if (index === 1 || index === 2) { spanClass = "md:col-span-2 md:row-span-1"; titleSize = "text-2xl md:text-3xl"; }
-              } else if (totalItems === 2) {
-                spanClass = "md:col-span-2 md:row-span-2"; titleSize = "text-3xl md:text-5xl";
-              } else {
-                spanClass = "md:col-span-4 md:row-span-2"; titleSize = "text-4xl md:text-6xl";
-              }
-              
-              return (
-                <div class={`group relative rounded-3xl md:rounded-[2.5rem] overflow-hidden bg-slate-100 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 block ${spanClass} border border-white/50`}>
+          <div class="flex flex-col flex-1 min-h-0 w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 flex-1 min-h-0 mb-6 overflow-y-auto pr-2">
+              {projects.slice(0, 6).map((project) => (
+                <a href="/galeri-perjalanan" class="group relative rounded-3xl overflow-hidden bg-slate-100 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 block border border-white/50 aspect-[4/3] w-full">
                   <img src={project.image_url || 'https://images.unsplash.com/photo-1469474968028?w=800'} alt={project.title} class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                  
-                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
-                  
-                  <div class="absolute inset-0 p-6 md:p-10 flex flex-col justify-end z-20">
-                    <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                      <h3 class={`text-white font-black tracking-tight leading-tight ${titleSize} mb-2`}>{project.title}</h3>
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500"></div>
+                  <div class="absolute inset-0 p-6 flex flex-col justify-end z-20">
+                    <div class="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                      <h3 class="text-white font-black tracking-tight leading-tight text-xl mb-1">{project.title}</h3>
                       {project.description && (
                         <p class="text-slate-300 text-sm line-clamp-2 md:opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 font-medium">{project.description}</p>
                       )}
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                </a>
+              ))}
+            </div>
+            <div class="flex justify-center shrink-0">
+              <a href="/galeri-perjalanan" class="inline-flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-full hover:bg-indigo-600 transition-colors shadow-lg shadow-indigo-500/20 group">
+                Lebih Banyak (More)
+                <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </a>
+            </div>
           </div>
         )}
       </div>
     </section>
 
     <!-- AREA 4: BLOG / JOURNAL -->
-    <section id="journal" class="w-full h-[100dvh] snap-start snap-always shrink-0 flex items-center justify-center relative px-6 md:px-12 pt-20">
+    <section id="journal" class="w-full min-h-screen flex items-center justify-center relative px-6 md:px-12 pt-20 pb-10">
       <div class="max-w-[1400px] w-full h-full max-h-[900px] flex flex-col justify-center">
         <div class="mb-10 lg:mb-16 text-center flex flex-col items-center shrink-0">
           <span class="text-indigo-600 font-extrabold text-xs uppercase tracking-[0.2em] block mb-3">Thoughts & Journeys</span>
@@ -232,8 +202,3 @@ const aboutFocus = getSetting("about_focus", "I focus on delivering high impact 
   </div>
 </Layout>
 
-<style>
-  html, body {
-    overflow: hidden;
-  }
-</style>
