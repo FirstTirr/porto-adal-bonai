@@ -23,7 +23,13 @@ const defaultSettings = {
   about_location: "Based in Jakarta. I spend my weekdays writing code and designing interfaces, and my weekends hiking peaks and chasing trails.",
   about_journey: "I am a digital creator who loves merging the spirit of outdoor exploration, fitness, and a healthy lifestyle into educational articles and portfolio works. My goal is to inspire others to live an active and fulfilling life through my digital projects.",
   about_focus: "Whether I am building web experiences or capturing the morning fog on a mountain trail, I approach everything with a keen eye for detail, performance, and structure. Making the web beautiful step by step.",
-  about_img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80"
+  about_img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
+  social_wa: "https://wa.me/",
+  social_ig: "https://instagram.com/",
+  social_tiktok: "https://tiktok.com/",
+  social_linkedin: "https://linkedin.com/in/",
+  social_facebook: "https://facebook.com/",
+  social_x: "https://x.com/"
 };
 
 const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<string, string>)[key] || defaultSettings[key] || "";
@@ -32,19 +38,37 @@ const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<st
 <Layout>
   <div class="max-w-7xl mx-auto py-8 px-5 min-h-[85vh]">
     {!authenticated ? (
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-w-md mx-auto mt-20">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Login Admin</h2>
-        <form id="login-form" class="grid gap-4">
-          <label class="grid gap-1.5 font-bold mb-1.5 text-slate-700">
+      <section class="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-md mx-auto mt-20 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-400 to-indigo-500"></div>
+        <div class="mb-8 text-center">
+          <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-500 shadow-inner">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <h2 class="text-3xl font-black text-slate-900 tracking-tight">Login Admin</h2>
+          <p class="text-sm text-slate-500 mt-2 font-medium">Masuk untuk mengelola portfolio Anda</p>
+        </div>
+        <form id="login-form" class="grid gap-5">
+          <label class="grid gap-2 font-bold text-sm text-slate-700">
             Username
-            <input name="username" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" />
+            <input name="username" placeholder="Masukkan username" required class="w-full p-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none font-medium placeholder:font-normal" />
           </label>
-          <label class="grid gap-1.5 font-bold mb-1.5 text-slate-700">
+          <label class="grid gap-2 font-bold text-sm text-slate-700 relative">
             Password
-            <input name="password" type="password" required class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" />
+            <div class="relative">
+              <input id="password-input" name="password" type="password" placeholder="••••••••" required class="w-full p-3.5 pr-12 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none font-medium placeholder:font-normal cursor-text tracking-widest placeholder:tracking-normal" />
+              <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer" aria-label="Toggle password visibility">
+                <svg id="eye-icon-open" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                <svg id="eye-icon-closed" class="w-5 h-5 block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+              </button>
+            </div>
           </label>
-          <button type="submit" class="cursor-pointer w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-md mt-6">Login</button>
-          <p id="login-status" class="m-0 text-gray-600"></p>
+          <button type="submit" class="group relative overflow-hidden cursor-pointer w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_4px_14px_0_rgb(79,70,229,0.39)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.23)] hover:-translate-y-0.5 mt-4">
+             <span class="relative z-10 flex items-center justify-center gap-2">
+               Masuk
+               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+             </span>
+          </button>
+          <p id="login-status" class="m-0 text-center text-sm font-medium text-red-500 h-5"></p>
         </form>
       </section>
     ) : (
@@ -158,6 +182,34 @@ const getSetting = (key: keyof typeof defaultSettings) => (settings as Record<st
                   Focus / Details (Paragraph 2)
                   <textarea name="about_focus" rows="3" class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none">{getSetting("about_focus")}</textarea>
                 </label>
+                <div class="w-full h-[1px] bg-slate-200 my-2"></div>
+                <h3 class="font-bold text-slate-800 text-lg">Sosial Media Footer</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    WhatsApp URL
+                    <input name="social_wa" value={getSetting("social_wa")} placeholder="https://wa.me/..." class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    Instagram URL
+                    <input name="social_ig" value={getSetting("social_ig")} placeholder="https://instagram.com/..." class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    TikTok URL
+                    <input name="social_tiktok" value={getSetting("social_tiktok")} placeholder="https://tiktok.com/@..." class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    LinkedIn URL
+                    <input name="social_linkedin" value={getSetting("social_linkedin")} placeholder="https://linkedin.com/in/..." class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    Facebook URL
+                    <input name="social_facebook" value={getSetting("social_facebook")} placeholder="https://facebook.com/..." class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                  <label class="grid gap-1.5 font-bold text-sm text-slate-700">
+                    X (Twitter) URL
+                    <input name="social_x" value={getSetting("social_x")} placeholder="https://x.com/..." class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none" />
+                  </label>
+                </div>
                 <div class="mt-4 flex items-center">
                   <button type="submit" class="bg-slate-900 border hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl transition-colors cursor-pointer">Save About Content</button>
                   <span class="settings-status ml-4 text-sm font-bold text-emerald-600"></span>
@@ -425,6 +477,30 @@ document.getElementById('settings-about-form')?.addEventListener('submit', (e) =
 
 const loginForm = document.getElementById('login-form');
 const loginStatus = document.getElementById('login-status');
+const togglePasswordBtn = document.getElementById('toggle-password');
+const passwordInput = document.getElementById('password-input') as HTMLInputElement | null;
+const eyeIconOpen = document.getElementById('eye-icon-open');
+const eyeIconClosed = document.getElementById('eye-icon-closed');
+
+if (togglePasswordBtn && passwordInput && eyeIconOpen && eyeIconClosed) {
+  togglePasswordBtn.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    if (isPassword) {
+      passwordInput.classList.remove('tracking-widest', 'placeholder:tracking-normal');
+      eyeIconOpen.classList.remove('hidden');
+      eyeIconOpen.classList.add('block');
+      eyeIconClosed.classList.remove('block');
+      eyeIconClosed.classList.add('hidden');
+    } else {
+      passwordInput.classList.add('tracking-widest', 'placeholder:tracking-normal');
+      eyeIconOpen.classList.remove('block');
+      eyeIconOpen.classList.add('hidden');
+      eyeIconClosed.classList.remove('hidden');
+      eyeIconClosed.classList.add('block');
+    }
+  });
+}
 
 if (loginForm instanceof HTMLFormElement && loginStatus) {
   loginForm.addEventListener('submit', async (event) => {
